@@ -1,0 +1,43 @@
+@startuml
+title AI Rephrase Tool - Sequence Diagram
+
+actor User
+
+participant "Streamlit UI" as Streamlit
+participant "AWS API Gateway" as APIGateway
+participant "AWS Lambda" as Lambda
+participant "Groq API\n(Llama 3.3)" as Groq
+
+User -> Streamlit : Enter text\nSelect tone & language\nSelect variants\nClick Rephrase Button
+
+Streamlit -> APIGateway : POST /rephrase\nJSON Payload
+
+activate APIGateway
+
+APIGateway -> Lambda : Invoke Lambda Function
+
+activate Lambda
+
+Lambda -> Lambda : Build Prompt
+
+Lambda -> Groq : HTTPS Chat Completion Request
+
+activate Groq
+
+Groq --> Lambda : AI Generated Paraphrases
+
+deactivate Groq
+
+Lambda -> Lambda : Parse & Format Response
+
+Lambda --> APIGateway : JSON Response
+
+deactivate Lambda
+
+APIGateway --> Streamlit : HTTP 200 Response
+
+deactivate APIGateway
+
+Streamlit --> User : Display Paraphrased Variants
+
+@enduml
